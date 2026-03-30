@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* ── Data ───────────────────────────────────────────────── */
 async function loadJobs() {
   try {
-    const res = await fetch('data/jobs.json');
+    const res = await fetch('./data/jobs.json');
     allJobs = await res.json();
   } catch (e) {
     console.error('Could not load jobs.json — are you running a local server?', e);

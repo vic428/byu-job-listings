@@ -98,6 +98,7 @@ function cardHTML(job) {
   const initials   = getInitials(job.organization);
   const badgeClass = badgeCSSClass(job.location_type);
   const dateLabel  = relativeDate(job.posted_days_ago);
+  const summary    = job.position_summary ? truncateText(job.position_summary, 140) : '';
 
   return `
     <article class="job-card" role="listitem">
@@ -112,8 +113,10 @@ function cardHTML(job) {
         ${job.program       ? `<span class="tag">${escapeHTML(job.program)}</span>`       : ''}
         ${job.region        ? `<span class="tag">${escapeHTML(job.region)}</span>`        : ''}
       </div>
+      ${summary ? `<p class="card-summary"><strong>Public Summary:</strong> ${escapeHTML(summary)}</p>` : ''}
       <div class="card-foot">
         <span class="card-date">${dateLabel}</span>
+        <a class="btn-card-details" href="job-details.html?id=${encodeURIComponent(job.id)}">View Details</a>
         <a class="btn-card-apply" href="${job.apply_url || '#'}">Apply</a>
       </div>
     </article>`;
@@ -208,6 +211,12 @@ function restoreFiltersFromURL() {
 }
 
 /* ── Helpers ────────────────────────────────────────────── */
+function truncateText(text, maxLength = 140) {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength).replace(/\s+$/, '') + '...';
+}
+
 function getInitials(orgName) {
   const words = (orgName || '').trim().split(/\s+/);
   const a = (words[0] || '').charAt(0).toUpperCase();

@@ -3,19 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Job Listings — BYU Pathway Worldwide</title>
+  <title>Browse Jobs — BYU Pathway Worldwide</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
   <!-- ============================================================
-       HEADER
-       In Power Pages this will be the site Header web template.
-       Keep this block in sync with Header.html in the main repo.
+       HEADER — mirrors Power Pages Header web template
   ============================================================ -->
   <header class="site-header">
     <div class="header-inner">
-
       <div class="logo-wrap">
         <div class="logo-accent"></div>
         <div class="logo-text">
@@ -26,122 +23,99 @@
       </div>
 
       <nav class="top-nav" aria-label="Primary">
-        <a href="#" class="nav-link"><span class="nav-icon">&#9906;</span> Search</a>
-        <span class="nav-sep">|</span>
-        <a href="#" class="nav-link">&#9829; Get Involved</a>
-        <span class="nav-sep">|</span>
-        <a href="#" class="nav-link">&#128279; Quick Links</a>
-        <span class="nav-sep">|</span>
-        <a href="#" class="nav-link">? Help</a>
-        <span class="nav-sep">|</span>
-        <a href="#" class="nav-link">&#128100; Sign In</a>
+        <a href="#" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link active">Browse Jobs</a>
+        <a href="#" class="nav-link">About</a>
       </nav>
 
       <div class="header-ctas">
-        <a href="#" class="btn-apply">&#10003; Apply For Free</a>
-        <a href="#" class="btn-info">&#9432; Request Info</a>
+        <a href="#" class="btn-find-job">Find a Job</a>
       </div>
-
-    </div>
-
-    <!-- Gold secondary bar -->
-    <div class="gold-bar">
-      <a href="#" class="gold-link">Search</a>
-      <a href="#" class="gold-link">Home</a>
-      <a href="index.html" class="gold-link active">Job Listings</a>
     </div>
   </header>
-  <!-- /HEADER -->
 
 
   <!-- ============================================================
-       MAIN CONTENT
-       In Power Pages this becomes the page body / web template.
-       The Liquid version is in: templates/job-listings-template.liquid
+       MAIN
   ============================================================ -->
-  <main>
+  <main class="page-main">
 
-    <!-- Filter Band -->
-    <section class="filter-band" aria-label="Search filters">
-      <h1>Job Listings</h1>
-      <form class="filters" id="filterForm" method="get" action="index.html">
-        <div class="fgroup">
-          <label class="flabel" for="kw">Keyword</label>
-          <input class="finput" id="kw" name="kw" type="text"
-                 placeholder="e.g. analyst, coordinator…" />
-        </div>
-        <div class="fgroup">
-          <label class="flabel" for="position">Position</label>
-          <select class="fselect" id="position" name="position">
-            <option value="">All positions</option>
-            <option value="Full-time">Full-time</option>
-            <option value="Part-time">Part-time</option>
-            <option value="Internship">Internship</option>
-          </select>
-        </div>
-        <div class="fgroup">
-          <label class="flabel" for="program">Program</label>
-          <select class="fselect" id="program" name="program">
-            <option value="">All programs</option>
-            <option value="Business Management">Business Management</option>
-            <option value="Health Informatics">Health Informatics</option>
-            <option value="Computer Science">Computer Science</option>
-            <option value="Accounting">Accounting</option>
-          </select>
-        </div>
-        <div class="fgroup">
-          <label class="flabel" for="Work-Mode">Work Mode</label>
-          <select class="fselect" id="work-mode" name="work-mode">
-            <option value="">All Modes</option>
-            <option value="Remote">Remote</option>
-            <option value="Hybrid">Hybrid</option>
-            <option value="On-site">On-site</option>
-          </select>
-        </div>
-        <div class="fgroup">
-          <label class="flabel" for="location">Location</label>
-          <select class="fselect" id="location" name="location">
-            <option value="">All locations</option>
-            <option value="Lagos">Lagos</option>
-            <option value="Abuja">Abuja</option>
-            <option value="Utah">Utah</option>
-            <option value="Americas">Americas</option>
-            <option value="Africa">Africa</option>
-          </select>
-        </div>
-
-        <button class="btn-search" type="submit">Search</button>
-      </form>
-    </section>
-
-    <!-- Results Bar -->
-    <div class="results-bar">
-      <span id="resultsCount">Showing 1–9 of <strong>2,345</strong> listings</span>
-      <div class="sort-wrap">
-        <label for="sortBy" style="font-size:12px;color:#666;">Sort by</label>
-        <select id="sortBy" class="sort-select">
-          <option>Most recent</option>
-          <option>Relevance</option>
-          <option>Location</option>
-        </select>
-      </div>
+    <div class="page-title">
+      <h1>Browse Jobs</h1>
+      <p id="resultsCount" class="results-count">Loading…</p>
     </div>
 
-    <!-- Job Card Grid -->
-    <!-- NOTE: In production this grid is rendered by the Liquid {% for %} loop -->
-    <!-- Data is loaded from data/jobs.json for local dev (see js/main.js)       -->
-    <div class="job-grid" id="jobGrid" aria-label="Job listings"></div>
+    <div class="page-body">
 
-    <!-- Pagination -->
-    <nav class="pagination" id="pagination" aria-label="Pagination"></nav>
+      <!-- LEFT SIDEBAR -->
+      <aside class="filter-sidebar">
+        <h2 class="sidebar-heading">Filters</h2>
 
+        <div class="filter-group">
+          <label class="filter-label" for="kw">Keyword</label>
+          <div class="search-input-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input class="filter-input" id="kw" type="text" placeholder="Title, company…" />
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Program</label>
+          <div class="pill-group" id="programPills">
+            <button class="pill active" data-value="">All</button>
+            <button class="pill" data-value="Business Management">Business</button>
+            <button class="pill" data-value="Health Informatics">Health</button>
+            <button class="pill" data-value="Computer Science">Technology</button>
+            <button class="pill" data-value="Accounting">Accounting</button>
+            <button class="pill" data-value="Marketing">Marketing</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Job Type</label>
+          <div class="pill-group" id="positionPills">
+            <button class="pill active" data-value="">All</button>
+            <button class="pill" data-value="Full-time">Full-time</button>
+            <button class="pill" data-value="Part-time">Part-time</button>
+            <button class="pill" data-value="Contract">Contract</button>
+            <button class="pill" data-value="Internship">Internship</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label" for="location">Location</label>
+          <div class="select-wrap">
+            <select class="filter-select" id="location">
+              <option value="">All</option>
+              <option value="Remote">Remote</option>
+              <option value="Hybrid">Hybrid</option>
+              <option value="On-site">On-site</option>
+              <option value="Americas">Americas</option>
+              <option value="Africa">Africa</option>
+            </select>
+            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+        </div>
+
+        <button class="btn-clear" id="clearBtn">Clear all filters</button>
+      </aside>
+
+      <!-- RIGHT RESULTS -->
+      <section class="results-panel">
+        <div class="job-grid" id="jobGrid"></div>
+        <nav class="pagination" id="pagination"></nav>
+      </section>
+
+    </div>
   </main>
-  <!-- /MAIN CONTENT -->
 
 
   <!-- ============================================================
        FOOTER
-       In Power Pages this will be the site Footer web template.
   ============================================================ -->
   <footer class="site-footer">
     <div class="footer-inner">
@@ -165,7 +139,6 @@
       </div>
     </div>
   </footer>
-  <!-- /FOOTER -->
 
   <script src="js/main.js"></script>
 </body>

@@ -8,8 +8,9 @@
     "location_type": "Remote",
     "region": "Americas",
     "posted_days_ago": 2,
-    "apply_url": "#",
-    "position_summary": "Data Analyst — Operations at TechWorks Inc. involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$65k–$80k",
+    "description": "TechWorks is seeking a Data Analyst to support operational decisions across our global teams. You will build dashboards, analyse KPIs, and present findings to senior leadership.",
+    "apply_url": "#"
   },
   {
     "id": "002",
@@ -17,11 +18,12 @@
     "organization": "HealthCore Systems",
     "position_type": "Full-time",
     "program": "Health Informatics",
-    "location_type": "Hybrid",
+    "location_type": "On-site",
     "region": "Americas",
     "posted_days_ago": 3,
-    "apply_url": "#",
-    "position_summary": "Patient Records Coordinator at HealthCore Systems involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$45k–$55k",
+    "description": "HealthCore is looking for a detail-oriented Records Coordinator to manage patient data, ensure HIPAA compliance, and liaise between clinical and administrative teams.",
+    "apply_url": "#"
   },
   {
     "id": "003",
@@ -29,11 +31,12 @@
     "organization": "Nexora Labs",
     "position_type": "Full-time",
     "program": "Computer Science",
-    "location_type": "On-site",
+    "location_type": "Hybrid",
     "region": "Africa",
     "posted_days_ago": 5,
-    "apply_url": "#",
-    "position_summary": "Junior Software Developer at Nexora Labs involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$55k–$70k",
+    "description": "Nexora Labs is hiring a Junior Developer to build and maintain web applications. You will work alongside senior engineers on agile sprints and ship features weekly.",
+    "apply_url": "#"
   },
   {
     "id": "004",
@@ -44,8 +47,9 @@
     "location_type": "Remote",
     "region": "Americas",
     "posted_days_ago": 7,
-    "apply_url": "#",
-    "position_summary": "Accounts Payable Specialist at FinNova Group involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$22–$28/hr",
+    "description": "FinNova Group needs an Accounts Payable Specialist to process invoices, reconcile vendor statements, and support month-end close activities on a part-time basis.",
+    "apply_url": "#"
   },
   {
     "id": "005",
@@ -56,8 +60,9 @@
     "location_type": "Hybrid",
     "region": "Americas",
     "posted_days_ago": 8,
-    "apply_url": "#",
-    "position_summary": "Project Manager — IT at BuildVentures Co. involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$80k–$95k",
+    "description": "BuildVentures is seeking a Project Manager to lead cross-functional IT initiatives. You will own delivery timelines, manage stakeholder expectations, and mitigate risks.",
+    "apply_url": "#"
   },
   {
     "id": "006",
@@ -68,8 +73,9 @@
     "location_type": "Remote",
     "region": "Americas",
     "posted_days_ago": 14,
-    "apply_url": "#",
-    "position_summary": "UX Research Intern at Spark Product Studio involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$20/hr",
+    "description": "Spark Product Studio is offering a UX Research internship to conduct user interviews, synthesise findings, and contribute to product design decisions for our SaaS platform.",
+    "apply_url": "#"
   },
   {
     "id": "007",
@@ -80,20 +86,22 @@
     "location_type": "On-site",
     "region": "Americas",
     "posted_days_ago": 15,
-    "apply_url": "#",
-    "position_summary": "Medical Billing Clerk at MedHarbor Clinic involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$38k–$46k",
+    "description": "MedHarbor Clinic is hiring a Medical Billing Clerk to process insurance claims, follow up on denials, and maintain accurate patient billing records in our EHR system.",
+    "apply_url": "#"
   },
   {
     "id": "008",
     "title": "Financial Reporting Analyst",
     "organization": "Agora Finance",
-    "position_type": "Full-time",
+    "position_type": "Contract",
     "program": "Accounting",
-    "location_type": "Hybrid",
+    "location_type": "Remote",
     "region": "Africa",
     "posted_days_ago": 21,
-    "apply_url": "#",
-    "position_summary": "Financial Reporting Analyst at Agora Finance involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$75/hr",
+    "description": "Agora Finance seeks a contract Financial Reporting Analyst to prepare consolidated financial statements, support audits, and ensure compliance with IFRS reporting standards.",
+    "apply_url": "#"
   },
   {
     "id": "009",
@@ -101,11 +109,12 @@
     "organization": "Ovation Logistics",
     "position_type": "Full-time",
     "program": "Business Management",
-    "location_type": "Remote",
+    "location_type": "Hybrid",
     "region": "Americas",
     "posted_days_ago": 22,
-    "apply_url": "#",
-    "position_summary": "Supply Chain Coordinator at Ovation Logistics involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$50k–$62k",
+    "description": "Ovation Logistics is looking for a Supply Chain Coordinator to track shipments, liaise with vendors, and optimise procurement workflows across our distribution network.",
+    "apply_url": "#"
   },
   {
     "id": "010",
@@ -116,8 +125,9 @@
     "location_type": "Hybrid",
     "region": "Africa",
     "posted_days_ago": 3,
-    "apply_url": "#",
-    "position_summary": "Business Systems Analyst at CorePath Solutions involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$70k–$85k",
+    "description": "CorePath Solutions needs a Business Systems Analyst to bridge business and IT teams, gather requirements, and drive ERP system improvements across the organisation.",
+    "apply_url": "#"
   },
   {
     "id": "011",
@@ -128,8 +138,9 @@
     "location_type": "Remote",
     "region": "Americas",
     "posted_days_ago": 6,
-    "apply_url": "#",
-    "position_summary": "Health Data Specialist at Vitalis Group involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$25–$32/hr",
+    "description": "Vitalis Group is seeking a Health Data Specialist to clean, validate, and analyse clinical datasets, supporting population health research initiatives on a part-time schedule.",
+    "apply_url": "#"
   },
   {
     "id": "012",
@@ -140,151 +151,8 @@
     "location_type": "On-site",
     "region": "Africa",
     "posted_days_ago": 10,
-    "apply_url": "#",
-    "position_summary": "Tax Compliance Associate at Summit Audit Co. involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "013",
-    "title": "Database Administrator",
-    "organization": "CloudSync Technologies",
-    "position_type": "Full-time",
-    "program": "Computer Science",
-    "location_type": "Remote",
-    "region": "Americas",
-    "posted_days_ago": 4,
-    "apply_url": "#",
-    "position_summary": "Database Administrator at CloudSync Technologies involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "014",
-    "title": "Clinical Documentation Specialist",
-    "organization": "Wellness Partners Network",
-    "position_type": "Full-time",
-    "program": "Health Informatics",
-    "location_type": "Hybrid",
-    "region": "Americas",
-    "posted_days_ago": 1,
-    "apply_url": "#",
-    "position_summary": "Clinical Documentation Specialist at Wellness Partners Network involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "015",
-    "title": "Budget Analyst",
-    "organization": "Imperial Financial Services",
-    "position_type": "Full-time",
-    "program": "Accounting",
-    "location_type": "On-site",
-    "region": "Africa",
-    "posted_days_ago": 9,
-    "apply_url": "#",
-    "position_summary": "Budget Analyst at Imperial Financial Services involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "016",
-    "title": "Operations Manager",
-    "organization": "Excellence Consulting Group",
-    "position_type": "Full-time",
-    "program": "Business Management",
-    "location_type": "Hybrid",
-    "region": "Americas",
-    "posted_days_ago": 11,
-    "apply_url": "#",
-    "position_summary": "Operations Manager at Excellence Consulting Group involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "017",
-    "title": "Frontend Developer",
-    "organization": "Digital Horizon Studios",
-    "position_type": "Full-time",
-    "program": "Computer Science",
-    "location_type": "Remote",
-    "region": "Africa",
-    "posted_days_ago": 2,
-    "apply_url": "#",
-    "position_summary": "Frontend Developer at Digital Horizon Studios involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "018",
-    "title": "Healthcare Compliance Officer",
-    "organization": "MediGuard Solutions",
-    "position_type": "Part-time",
-    "program": "Health Informatics",
-    "location_type": "Remote",
-    "region": "Americas",
-    "posted_days_ago": 18,
-    "apply_url": "#",
-    "position_summary": "Healthcare Compliance Officer at MediGuard Solutions involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "019",
-    "title": "Payroll Administrator",
-    "organization": "HumanFlow HR Systems",
-    "position_type": "Full-time",
-    "program": "Accounting",
-    "location_type": "On-site",
-    "region": "Americas",
-    "posted_days_ago": 12,
-    "apply_url": "#",
-    "position_summary": "Payroll Administrator at HumanFlow HR Systems involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "020",
-    "title": "Strategic Planning Consultant",
-    "organization": "Pinnacle Growth Partners",
-    "position_type": "Full-time",
-    "program": "Business Management",
-    "location_type": "Hybrid",
-    "region": "Africa",
-    "posted_days_ago": 6,
-    "apply_url": "#",
-    "position_summary": "Strategic Planning Consultant at Pinnacle Growth Partners involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "021",
-    "title": "Systems Engineer Intern",
-    "organization": "TechForward Innovations",
-    "position_type": "Internship",
-    "program": "Computer Science",
-    "location_type": "On-site",
-    "region": "Americas",
-    "posted_days_ago": 19,
-    "apply_url": "#",
-    "position_summary": "Systems Engineer Intern at TechForward Innovations involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "022",
-    "title": "Health Records Manager",
-    "organization": "CareLine Regional Hospital",
-    "position_type": "Full-time",
-    "program": "Health Informatics",
-    "location_type": "On-site",
-    "region": "Africa",
-    "posted_days_ago": 13,
-    "apply_url": "#",
-    "position_summary": "Health Records Manager at CareLine Regional Hospital involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "023",
-    "title": "Auditor — Internal",
-    "organization": "Precision Audit Solutions",
-    "position_type": "Full-time",
-    "program": "Accounting",
-    "location_type": "Hybrid",
-    "region": "Americas",
-    "posted_days_ago": 5,
-    "apply_url": "#",
-    "position_summary": "Auditor — Internal at Precision Audit Solutions involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
-  },
-  {
-    "id": "024",
-    "title": "Market Research Manager",
-    "organization": "Insight Analytics Corp",
-    "position_type": "Full-time",
-    "program": "Business Management",
-    "location_type": "Remote",
-    "region": "Americas",
-    "posted_days_ago": 17,
-    "apply_url": "#",
-    "position_summary": "Market Research Manager at Insight Analytics Corp involves supporting key business objectives with strong communication, collaboration, and technical insight. Ideal candidates demonstrate accountability, adaptability, and drive to learn in a fast-paced environment."
+    "salary": "$52k–$65k",
+    "description": "Summit Audit Co. is hiring a Tax Compliance Associate to prepare corporate tax returns, research tax regulations, and support clients through audits and tax planning exercises.",
+    "apply_url": "#"
   }
 ]

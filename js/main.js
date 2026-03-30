@@ -1,62 +1,58 @@
 /**
  * BYU Pathway — Job Listings (Local Dev)
- * -------------------------------------------------------
- * Loads data/jobs.json, filters in JS, renders cards and
- * pagination. Mirrors the Liquid/FetchXML logic in
- * templates/job-listings-template.liquid so you can
- * visually verify before transferring to Power Pages.
+ * Updated to match client reference: sidebar pills, card with
+ * description snippet + salary, 2-column results grid.
  */
 
-const PAGE_SIZE = 9;
-let allJobs = [];
+const PAGE_SIZE = 10;
+let allJobs     = [];
 let currentPage = 1;
 
-/* ── Boot ──────────────────────────────────────────────── */
+/* Active filter state */
+let filters = {
+  kw:       '',
+  program:  '',
+  position: '',
+  location: '',
+};
+
+/* ── Boot ──────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
   await loadJobs();
   restoreFiltersFromURL();
+  bindAll();
   render();
-  bindFilterForm();
 });
 
-/* ── Data ───────────────────────────────────────────────── */
+/* ── Data ───────────────────────────────────────────────────────── */
 async function loadJobs() {
   try {
     const res = await fetch('./data/jobs.json');
     allJobs = await res.json();
   } catch (e) {
-    console.error('Could not load jobs.json — are you running a local server?', e);
+    console.error('Could not load jobs.json — run via Live Server.', e);
     allJobs = [];
   }
 }
 
-/* ── Filtering ──────────────────────────────────────────── */
-function getFilters() {
-  return {
-    kw:       document.getElementById('kw')?.value.trim().toLowerCase() || '',
-    position: document.getElementById('position')?.value || '',
-    program:  document.getElementById('program')?.value  || '',
-    workMode: document.getElementById('work-mode')?.value || '',
-    location: document.getElementById('location')?.value || '',
-  };
-}
-
-function applyFilters(jobs, filters) {
+/* ── Filter Logic ───────────────────────────────────────────────── */
+function applyFilters(jobs) {
   return jobs.filter(job => {
-    if (filters.kw && !job.title.toLowerCase().includes(filters.kw) &&
-                      !job.organization.toLowerCase().includes(filters.kw)) return false;
-    if (filters.position && job.position_type !== filters.position) return false;
+    const kw = filters.kw.toLowerCase();
+    if (kw && !job.title.toLowerCase().includes(kw) &&
+              !job.organization.toLowerCase().includes(kw) &&
+              !job.description.toLowerCase().includes(kw)) return false;
     if (filters.program  && job.program       !== filters.program)  return false;
-    if (filters.workMode && job.location_type !== filters.workMode)  return false;
-    if (filters.location && job.location_type !== filters.location) return false;
+    if (filters.position && job.position_type !== filters.position) return false;
+    if (filters.location && job.location_type !== filters.location &&
+                            job.region        !== filters.location) return false;
     return true;
   });
 }
 
-/* ── Rendering ──────────────────────────────────────────── */
+/* ── Render ─────────────────────────────────────────────────────── */
 function render() {
-  const filters  = getFilters();
-  const filtered = applyFilters(allJobs, filters);
+  const filtered = applyFilters(allJobs);
   const total    = filtered.length;
   const pages    = Math.max(1, Math.ceil(total / PAGE_SIZE));
   currentPage    = Math.min(currentPage, pages);
@@ -64,20 +60,18 @@ function render() {
   const start = (currentPage - 1) * PAGE_SIZE;
   const slice = filtered.slice(start, start + PAGE_SIZE);
 
-  renderResultsBar(total, start, slice.length);
+  updateResultsCount(total);
   renderGrid(slice, total);
-  renderPagination(pages, filters);
+  renderPagination(pages);
+  syncURLParams();
 }
 
-function renderResultsBar(total, start, count) {
+function updateResultsCount(total) {
   const el = document.getElementById('resultsCount');
   if (!el) return;
-  if (total === 0) {
-    el.innerHTML = 'No listings found';
-  } else {
-    const end = start + count;
-    el.innerHTML = `Showing ${start + 1}–${end} of <strong>${total.toLocaleString()}</strong> listings`;
-  }
+  el.textContent = total === 0
+    ? 'No roles found'
+    : `${total} role${total === 1 ? '' : 's'} found`;
 }
 
 function renderGrid(jobs, total) {
@@ -87,70 +81,88 @@ function renderGrid(jobs, total) {
   if (total === 0) {
     grid.innerHTML = `
       <div class="empty-state">
-        <p>No job listings match your search.</p>
-        <button class="pag-btn" onclick="clearFilters()">Clear filters</button>
+        <p>No listings match your search.</p>
+        <button class="pag-btn" onclick="clearAllFilters()">Clear filters</button>
       </div>`;
     return;
   }
 
-  grid.innerHTML = jobs.map(job => cardHTML(job)).join('');
+  grid.innerHTML = jobs.map(cardHTML).join('');
 }
 
+/* ── Card HTML ──────────────────────────────────────────────────── */
 function cardHTML(job) {
   const initials   = getInitials(job.organization);
-  const badgeClass = badgeCSSClass(job.location_type);
   const dateLabel  = relativeDate(job.posted_days_ago);
-  const summary    = job.position_summary ? truncateText(job.position_summary, 140) : '';
+  const locationDisplay = job.location_type === 'Remote' || job.location_type === 'Hybrid'
+    ? job.location_type
+    : job.region || job.location_type;
+
+  /* Tag colours */
+  const typeTagClass = {
+    'Full-time':  'tag-type',
+    'Part-time':  'tag-type',
+    'Contract':   'tag-program',
+    'Internship': 'tag-program',
+  }[job.position_type] || 'tag-location';
 
   return `
-    <article class="job-card" role="listitem">
-      <div class="card-top">
-        <div class="card-initials" aria-hidden="true">${initials}</div>
-        <span class="badge ${badgeClass}">${escapeHTML(job.location_type)}</span>
-      </div>
-      <h2 class="card-title">${escapeHTML(job.title)}</h2>
-      <p class="card-id">Job ID: ${escapeHTML(job.id)}</p>
-      <p class="card-org">${escapeHTML(job.organization)}</p>
-      <div class="card-tags">
-        ${job.position_type ? `<span class="tag">${escapeHTML(job.position_type)}</span>` : ''}
-        ${job.program       ? `<span class="tag">${escapeHTML(job.program)}</span>`       : ''}
-        ${job.region        ? `<span class="tag">${escapeHTML(job.region)}</span>`        : ''}
-      </div>
-      ${summary ? `<p class="card-summary"><strong>Public Summary:</strong> ${escapeHTML(summary)}</p>` : ''}
-      <div class="card-foot">
+    <article class="job-card">
+      <div class="card-header">
+        <div class="card-initials">${initials}</div>
+        <div class="card-company-block">
+          <div class="card-company">${escapeHTML(job.organization)}</div>
+          <div class="card-location">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 21s-8-7.5-8-12a8 8 0 0 1 16 0c0 4.5-8 12-8 12z"/>
+              <circle cx="12" cy="9" r="2.5"/>
+            </svg>
+            ${escapeHTML(locationDisplay)}
+          </div>
+        </div>
         <span class="card-date">${dateLabel}</span>
-        <a class="btn-card-details" href="job-details.html?id=${encodeURIComponent(job.id)}">View Details</a>
-        <a class="btn-card-apply" href="${job.apply_url || '#'}">Apply</a>
+      </div>
+
+      <h2 class="card-title">${escapeHTML(job.title)}</h2>
+
+      <p class="card-desc">${escapeHTML(job.description)}</p>
+
+      <div class="card-footer">
+        <div class="card-tags">
+          <span class="tag ${typeTagClass}">${escapeHTML(job.position_type)}</span>
+          <span class="tag tag-location">${escapeHTML(job.program.split(' ')[0])}</span>
+        </div>
+        ${job.salary ? `<span class="card-salary">${escapeHTML(job.salary)}</span>` : ''}
       </div>
     </article>`;
 }
 
-function renderPagination(totalPages, filters) {
+/* ── Pagination ─────────────────────────────────────────────────── */
+function renderPagination(totalPages) {
   const nav = document.getElementById('pagination');
-  if (!nav || totalPages <= 1) { if (nav) nav.innerHTML = ''; return; }
+  if (!nav) return;
+  if (totalPages <= 1) { nav.innerHTML = ''; return; }
 
   let html = '';
 
   if (currentPage > 1) {
-    html += paginationBtn(currentPage - 1, filters, '&larr; Prev');
+    html += `<button class="pag-btn" data-page="${currentPage - 1}">&larr; Prev</button>`;
   }
 
   for (let p = 1; p <= totalPages; p++) {
-    if (p === 1 || p === totalPages ||
-        (p >= currentPage - 2 && p <= currentPage + 2)) {
-      html += paginationBtn(p, filters, p, p === currentPage);
+    if (p === 1 || p === totalPages || (p >= currentPage - 2 && p <= currentPage + 2)) {
+      html += `<button class="pag-btn${p === currentPage ? ' active' : ''}" data-page="${p}">${p}</button>`;
     } else if (p === currentPage - 3 || p === currentPage + 3) {
-      html += '<span class="pag-ellipsis">&hellip;</span>';
+      html += `<span class="pag-ellipsis">&hellip;</span>`;
     }
   }
 
   if (currentPage < totalPages) {
-    html += paginationBtn(currentPage + 1, filters, 'Next &rarr;');
+    html += `<button class="pag-btn" data-page="${currentPage + 1}">Next &rarr;</button>`;
   }
 
   nav.innerHTML = html;
 
-  /* Attach click handlers */
   nav.querySelectorAll('.pag-btn[data-page]').forEach(btn => {
     btn.addEventListener('click', () => {
       currentPage = parseInt(btn.dataset.page, 10);
@@ -160,68 +172,123 @@ function renderPagination(totalPages, filters) {
   });
 }
 
-function paginationBtn(page, filters, label, isActive = false) {
-  return `<button class="pag-btn${isActive ? ' active' : ''}" data-page="${page}"
-            aria-label="Page ${page}" aria-current="${isActive ? 'page' : 'false'}">
-            ${label}
-          </button>`;
-}
+/* ── Event Binding ──────────────────────────────────────────────── */
+function bindAll() {
+  /* Keyword — live filter as user types */
+  const kwInput = document.getElementById('kw');
+  if (kwInput) {
+    kwInput.addEventListener('input', () => {
+      filters.kw = kwInput.value.trim();
+      currentPage = 1;
+      render();
+    });
+  }
 
-/* ── Event Binding ──────────────────────────────────────── */
-function bindFilterForm() {
-  const form = document.getElementById('filterForm');
-  if (!form) return;
+  /* Location dropdown */
+  const locSelect = document.getElementById('location');
+  if (locSelect) {
+    locSelect.addEventListener('change', () => {
+      filters.location = locSelect.value;
+      currentPage = 1;
+      render();
+    });
+  }
 
-  form.addEventListener('submit', e => {
-    e.preventDefault();
+  /* Program pill group */
+  bindPillGroup('programPills', val => {
+    filters.program = val;
     currentPage = 1;
     render();
-    syncURLParams();
+  });
+
+  /* Position pill group */
+  bindPillGroup('positionPills', val => {
+    filters.position = val;
+    currentPage = 1;
+    render();
+  });
+
+  /* Clear all */
+  const clearBtn = document.getElementById('clearBtn');
+  if (clearBtn) clearBtn.addEventListener('click', clearAllFilters);
+}
+
+function bindPillGroup(containerId, onChange) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      container.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      onChange(pill.dataset.value);
+    });
   });
 }
 
-function clearFilters() {
-  ['kw', 'position', 'program', 'work-mode', 'location'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
+/* ── Clear All ──────────────────────────────────────────────────── */
+function clearAllFilters() {
+  filters = { kw: '', program: '', position: '', location: '' };
+
+  const kwInput = document.getElementById('kw');
+  if (kwInput) kwInput.value = '';
+
+  const locSelect = document.getElementById('location');
+  if (locSelect) locSelect.value = '';
+
+  ['programPills', 'positionPills'].forEach(id => {
+    const container = document.getElementById(id);
+    if (!container) return;
+    container.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    const first = container.querySelector('.pill[data-value=""]');
+    if (first) first.classList.add('active');
   });
+
   currentPage = 1;
   render();
-  syncURLParams();
 }
 
-/* ── URL Sync (mirrors Power Pages query-string behaviour) ── */
+/* ── URL Sync ───────────────────────────────────────────────────── */
 function syncURLParams() {
-  const { kw, position, program, workMode, location } = getFilters();
   const params = new URLSearchParams();
-  if (kw)       params.set('kw', kw);
-  if (position) params.set('position', position);
-  if (program)  params.set('program', program);
-  if (workMode) params.set('work-mode', workMode);
-  if (location) params.set('location', location);
-  if (currentPage > 1) params.set('page', currentPage);
+  if (filters.kw)       params.set('kw',       filters.kw);
+  if (filters.program)  params.set('program',  filters.program);
+  if (filters.position) params.set('position', filters.position);
+  if (filters.location) params.set('location', filters.location);
+  if (currentPage > 1)  params.set('page',     currentPage);
   const qs = params.toString();
   history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
 }
 
 function restoreFiltersFromURL() {
   const params = new URLSearchParams(window.location.search);
-  const set    = (id, key) => { const el = document.getElementById(id); if (el && params.get(key)) el.value = params.get(key); };
-  set('kw',       'kw');
-  set('position', 'position');
-  set('program',  'program');
-  set('work-mode','work-mode');
-  set('location', 'location');
-  currentPage = parseInt(params.get('page') || '1', 10);
+  filters.kw       = params.get('kw')       || '';
+  filters.program  = params.get('program')  || '';
+  filters.position = params.get('position') || '';
+  filters.location = params.get('location') || '';
+  currentPage      = parseInt(params.get('page') || '1', 10);
+
+  /* Restore input values */
+  const kwInput = document.getElementById('kw');
+  if (kwInput && filters.kw) kwInput.value = filters.kw;
+
+  const locSelect = document.getElementById('location');
+  if (locSelect && filters.location) locSelect.value = filters.location;
+
+  /* Restore active pills */
+  restorePills('programPills',  filters.program);
+  restorePills('positionPills', filters.position);
 }
 
-/* ── Helpers ────────────────────────────────────────────── */
-function truncateText(text, maxLength = 140) {
-  if (!text) return '';
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength).replace(/\s+$/, '') + '...';
+function restorePills(containerId, activeValue) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.querySelectorAll('.pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.value === activeValue);
+  });
 }
 
+/* ── Helpers ────────────────────────────────────────────────────── */
 function getInitials(orgName) {
   const words = (orgName || '').trim().split(/\s+/);
   const a = (words[0] || '').charAt(0).toUpperCase();
@@ -229,23 +296,15 @@ function getInitials(orgName) {
   return a + b;
 }
 
-function badgeCSSClass(locationType) {
-  switch ((locationType || '').toLowerCase()) {
-    case 'remote':  return 'badge-remote';
-    case 'hybrid':  return 'badge-hybrid';
-    default:        return 'badge-onsite';
-  }
-}
-
 function relativeDate(daysAgo) {
-  if (daysAgo === 0)  return 'Posted today';
-  if (daysAgo === 1)  return 'Posted yesterday';
-  if (daysAgo < 7)    return `Posted ${daysAgo} days ago`;
-  if (daysAgo < 14)   return 'Posted 1 week ago';
-  return `Posted ${Math.floor(daysAgo / 7)} weeks ago`;
+  if (daysAgo === 0)  return 'Today';
+  if (daysAgo === 1)  return '1d ago';
+  if (daysAgo < 7)    return `${daysAgo}d ago`;
+  if (daysAgo < 14)   return '1w ago';
+  return `${Math.floor(daysAgo / 7)}w ago`;
 }
 
 function escapeHTML(str) {
   return String(str || '').replace(/[&<>"']/g, c =>
-    ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 }

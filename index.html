@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job Listings — BYU Pathway Worldwide</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER
+       In Power Pages this will be the site Header web template.
+       Keep this block in sync with Header.html in the main repo.
+  ============================================================ -->
+  <header class="site-header">
+    <div class="header-inner">
+
+      <div class="logo-wrap">
+        <div class="logo-accent"></div>
+        <div class="logo-text">
+          <span class="logo-byu">BYU</span>
+          <span class="logo-pathway">PATHWAY</span>
+          <span class="logo-worldwide">WORLDWIDE</span>
+        </div>
+      </div>
+
+      <nav class="top-nav" aria-label="Primary">
+        <a href="#" class="nav-link"><span class="nav-icon">&#9906;</span> Search</a>
+        <span class="nav-sep">|</span>
+        <a href="#" class="nav-link">&#9829; Get Involved</a>
+        <span class="nav-sep">|</span>
+        <a href="#" class="nav-link">&#128279; Quick Links</a>
+        <span class="nav-sep">|</span>
+        <a href="#" class="nav-link">? Help</a>
+        <span class="nav-sep">|</span>
+        <a href="#" class="nav-link">&#128100; Sign In</a>
+      </nav>
+
+      <div class="header-ctas">
+        <a href="#" class="btn-apply">&#10003; Apply For Free</a>
+        <a href="#" class="btn-info">&#9432; Request Info</a>
+      </div>
+
+    </div>
+
+    <!-- Gold secondary bar -->
+    <div class="gold-bar">
+      <a href="#" class="gold-link">Search</a>
+      <a href="#" class="gold-link">Home</a>
+      <a href="index.html" class="gold-link active">Job Listings</a>
+    </div>
+  </header>
+  <!-- /HEADER -->
+
+
+  <!-- ============================================================
+       MAIN CONTENT
+       In Power Pages this becomes the page body / web template.
+       The Liquid version is in: templates/job-listings-template.liquid
+  ============================================================ -->
+  <main>
+
+    <!-- Filter Band -->
+    <section class="filter-band" aria-label="Search filters">
+      <h1>Job Listings</h1>
+      <form class="filters" id="filterForm" method="get" action="index.html">
+        <div class="fgroup">
+          <label class="flabel" for="kw">Keyword</label>
+          <input class="finput" id="kw" name="kw" type="text"
+                 placeholder="e.g. analyst, coordinator…" />
+        </div>
+        <div class="fgroup">
+          <label class="flabel" for="position">Position</label>
+          <select class="fselect" id="position" name="position">
+            <option value="">All positions</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Internship">Internship</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label class="flabel" for="program">Program</label>
+          <select class="fselect" id="program" name="program">
+            <option value="">All programs</option>
+            <option value="Business Management">Business Management</option>
+            <option value="Health Informatics">Health Informatics</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Accounting">Accounting</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label class="flabel" for="location">Location</label>
+          <select class="fselect" id="location" name="location">
+            <option value="">All locations</option>
+            <option value="Remote">Remote</option>
+            <option value="Hybrid">Hybrid</option>
+            <option value="On-site">On-site</option>
+            <option value="Americas">Americas</option>
+            <option value="Africa">Africa</option>
+          </select>
+        </div>
+        <button class="btn-search" type="submit">Search</button>
+      </form>
+    </section>
+
+    <!-- Results Bar -->
+    <div class="results-bar">
+      <span id="resultsCount">Showing 1–9 of <strong>2,345</strong> listings</span>
+      <div class="sort-wrap">
+        <label for="sortBy" style="font-size:12px;color:#666;">Sort by</label>
+        <select id="sortBy" class="sort-select">
+          <option>Most recent</option>
+          <option>Relevance</option>
+          <option>Location</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Job Card Grid -->
+    <!-- NOTE: In production this grid is rendered by the Liquid {% for %} loop -->
+    <!-- Data is loaded from data/jobs.json for local dev (see js/main.js)       -->
+    <div class="job-grid" id="jobGrid" aria-label="Job listings"></div>
+
+    <!-- Pagination -->
+    <nav class="pagination" id="pagination" aria-label="Pagination"></nav>
+
+  </main>
+  <!-- /MAIN CONTENT -->
+
+
+  <!-- ============================================================
+       FOOTER
+       In Power Pages this will be the site Footer web template.
+  ============================================================ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>BYU Pathway</h4>
+        <a href="#">About Us</a>
+        <a href="#">Programs</a>
+        <a href="#">Employer Partners</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="#">Resume Builder</a>
+        <a href="#">Career Coaching</a>
+        <a href="#">Interview Prep</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:support@byupathway.org">support@byupathway.org</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+      </div>
+    </div>
+  </footer>
+  <!-- /FOOTER -->
+
+  <script src="js/main.js"></script>
+</body>
+</html>

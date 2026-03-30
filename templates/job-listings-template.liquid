@@ -1,0 +1,387 @@
+{% comment %}
+  ===================================================================
+  Web Template: Job Listings Page
+  Power Pages / Dataverse
+  -------------------------------------------------------------------
+  SETUP REQUIREMENTS:
+  1. Create a Dataverse table called "cr_job_listing" (or adjust the
+     entityname below to match your actual table logical name).
+  2. Recommended columns:
+       cr_title          (Single line of text)
+       cr_organization   (Single line of text)
+       cr_position_type  (Choice: Full-time, Part-time, Internship)
+       cr_program        (Choice: Business Mgmt, Health Informatics,
+                          Computer Science, Accounting)
+       cr_location_type  (Choice: Remote, Hybrid, On-site)
+       cr_region         (Choice: Americas, Africa, Asia, Europe)
+       cr_posted_date    (Date Only)
+       cr_apply_url      (URL)
+  3. Set table permissions (read, minimum) for Web Roles that
+     should see the listings (e.g. Anonymous Users).
+  4. Paste this template into:
+       Power Pages Studio → Web Templates → New Web Template
+     Then assign it to the "Job Listings" page via its Page Template.
+  ===================================================================
+{% endcomment %}
+
+{% assign page_size = 9 %}
+{% assign current_page = request.params['page'] | default: 1 | times: 1 %}
+{% assign offset = current_page | minus: 1 | times: page_size %}
+
+{% assign kw       = request.params['kw']       | default: '' %}
+{% assign position = request.params['position'] | default: '' %}
+{% assign program  = request.params['program']  | default: '' %}
+{% assign location = request.params['location'] | default: '' %}
+
+{% comment %} Build FetchXML filter conditions dynamically {% endcomment %}
+{% capture filter_conditions %}
+  {% if kw != '' %}
+    <condition attribute="cr_title" operator="like" value="%{{ kw | xml_escape }}%" />
+  {% endif %}
+  {% if position != '' %}
+    <condition attribute="cr_position_type" operator="eq" value="{{ position | xml_escape }}" />
+  {% endif %}
+  {% if program != '' %}
+    <condition attribute="cr_program" operator="eq" value="{{ program | xml_escape }}" />
+  {% endif %}
+  {% if location != '' %}
+    <condition attribute="cr_location_type" operator="eq" value="{{ location | xml_escape }}" />
+  {% endif %}
+{% endcapture %}
+
+{% fetchxml listings_query %}
+<fetch version="1.0" mapping="logical" count="{{ page_size }}" page="{{ current_page }}" returntotalrecordcount="true">
+  <entity name="cr_job_listing">
+    <attribute name="cr_joblistingid" />
+    <attribute name="cr_title" />
+    <attribute name="cr_organization" />
+    <attribute name="cr_position_type" />
+    <attribute name="cr_program" />
+    <attribute name="cr_location_type" />
+    <attribute name="cr_region" />
+    <attribute name="cr_posted_date" />
+    <attribute name="cr_apply_url" />
+    <filter type="and">
+      <condition attribute="statecode" operator="eq" value="0" />
+      {{ filter_conditions }}
+    </filter>
+    <order attribute="cr_posted_date" descending="true" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+
+{% assign total_records = listings_query.results.total_record_count | default: 0 %}
+{% assign total_pages = total_records | divided_by: page_size | ceil %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job Listings — BYU Pathway Worldwide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, serif; background: #f8f8f6; color: #1a2744; }
+
+    /* ---- FILTER BAND ---- */
+    .jl-filterband { background: #1a2744; padding: 28px 32px 22px; }
+    .jl-filterband h1 { font-size: 22px; color: #fff; margin-bottom: 16px; font-weight: 500; }
+    .jl-filters { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
+    .jl-fgroup { display: flex; flex-direction: column; gap: 4px; }
+    .jl-flabel { font-size: 11px; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: .5px; }
+    .jl-input, .jl-select {
+      padding: 9px 12px; border: 1px solid rgba(255,255,255,.2);
+      border-radius: 3px; background: rgba(255,255,255,.1);
+      color: #fff; font-size: 13px; font-family: Georgia, serif;
+      width: 100%; appearance: none;
+    }
+    .jl-input::placeholder { color: rgba(255,255,255,.4); }
+    .jl-select option { color: #1a2744; background: #fff; }
+    .jl-btn-search {
+      background: #f0c030; color: #1a2744; border: none;
+      border-radius: 3px; padding: 10px 22px; font-size: 13px;
+      font-weight: 600; cursor: pointer; height: 38px;
+      font-family: Georgia, serif; white-space: nowrap;
+    }
+    .jl-btn-search:hover { background: #e0b020; }
+
+    /* ---- RESULTS BAR ---- */
+    .jl-resultsbar {
+      background: #fff; padding: 12px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #e0e0d8;
+    }
+    .jl-resultsbar span { font-size: 13px; color: #666; }
+
+    /* ---- GRID ---- */
+    .jl-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px; padding: 20px 32px;
+    }
+
+    /* ---- CARD ---- */
+    .jl-card {
+      background: #fff; border: 1px solid #e0e0d8;
+      border-radius: 4px; padding: 18px;
+      display: flex; flex-direction: column; gap: 10px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .jl-card:hover { border-color: #f0c030; box-shadow: 0 2px 12px rgba(26,39,68,.08); }
+    .jl-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .jl-card-initials {
+      width: 40px; height: 40px; border-radius: 3px;
+      background: #eef2fa; display: flex; align-items: center;
+      justify-content: center; font-size: 13px; font-weight: 700;
+      color: #1a2744;
+    }
+    .jl-badge {
+      font-size: 10px; padding: 3px 8px;
+      border-radius: 100px; font-weight: 500;
+    }
+    .badge-remote  { background: #e8f5f0; color: #0f6e56; }
+    .badge-hybrid  { background: #eeedfe; color: #3c3489; }
+    .badge-onsite  { background: #faeeda; color: #633806; }
+    .jl-card h3 { font-size: 14px; font-weight: 700; color: #1a2744; line-height: 1.35; }
+    .jl-card-org { font-size: 12px; color: #777; }
+    .jl-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .jl-tag {
+      font-size: 10px; padding: 2px 7px; border-radius: 2px;
+      background: #f0f2f8; color: #1a2744;
+      border: 1px solid #dde2f0;
+    }
+    .jl-card-foot {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #f0f0e8; padding-top: 10px;
+    }
+    .jl-card-foot span { font-size: 11px; color: #aaa; }
+    .jl-btn-apply {
+      font-size: 11px; color: #1a2744; font-family: Georgia, serif;
+      border: 1px solid #1a2744; padding: 4px 12px;
+      border-radius: 2px; background: transparent;
+      font-weight: 500; cursor: pointer; text-decoration: none;
+    }
+    .jl-btn-apply:hover { background: #1a2744; color: #fff; }
+
+    /* ---- EMPTY STATE ---- */
+    .jl-empty {
+      grid-column: 1 / -1; text-align: center;
+      padding: 60px 20px; color: #999;
+    }
+    .jl-empty p { font-size: 15px; margin-bottom: 8px; }
+
+    /* ---- PAGINATION ---- */
+    .jl-pagination {
+      padding: 14px 32px 24px;
+      display: flex; align-items: center;
+      justify-content: center; gap: 6px;
+    }
+    .jl-pag-btn {
+      font-size: 13px; padding: 5px 12px;
+      border-radius: 3px; border: 1px solid #ddd;
+      background: #fff; color: #1a2744;
+      cursor: pointer; font-family: Georgia, serif;
+      text-decoration: none;
+    }
+    .jl-pag-btn.active,
+    .jl-pag-btn:hover  { background: #1a2744; color: #fff; border-color: #1a2744; }
+    .jl-pag-info { font-size: 12px; color: #aaa; margin: 0 8px; }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 900px) {
+      .jl-filters { grid-template-columns: 1fr 1fr; }
+      .jl-grid    { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px) {
+      .jl-filters { grid-template-columns: 1fr; }
+      .jl-grid    { grid-template-columns: 1fr; }
+      .jl-filterband, .jl-resultsbar, .jl-grid, .jl-pagination { padding-left: 16px; padding-right: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  {%- comment -%} ── Filter Band ────────────────────────────────────── {%- endcomment -%}
+  <div class="jl-filterband">
+    <h1>Job Listings</h1>
+    <form method="get" action="{{ page.url }}">
+      <div class="jl-filters">
+
+        <div class="jl-fgroup">
+          <label class="jl-flabel" for="kw">Keyword</label>
+          <input class="jl-input" id="kw" name="kw"
+                 type="text" placeholder="e.g. analyst, coordinator…"
+                 value="{{ kw | xml_escape }}" />
+        </div>
+
+        <div class="jl-fgroup">
+          <label class="jl-flabel" for="position">Position</label>
+          <select class="jl-select" id="position" name="position">
+            <option value="">All positions</option>
+            {% assign position_options = "Full-time,Part-time,Internship" | split: "," %}
+            {% for opt in position_options %}
+              <option value="{{ opt }}"
+                {% if position == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="jl-fgroup">
+          <label class="jl-flabel" for="program">Program</label>
+          <select class="jl-select" id="program" name="program">
+            <option value="">All programs</option>
+            {% assign program_options = "Business Management,Health Informatics,Computer Science,Accounting" | split: "," %}
+            {% for opt in program_options %}
+              <option value="{{ opt }}"
+                {% if program == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="jl-fgroup">
+          <label class="jl-flabel" for="location">Location</label>
+          <select class="jl-select" id="location" name="location">
+            <option value="">All locations</option>
+            {% assign location_options = "Remote,Hybrid,On-site" | split: "," %}
+            {% for opt in location_options %}
+              <option value="{{ opt }}"
+                {% if location == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button class="jl-btn-search" type="submit">Search</button>
+      </div>
+    </form>
+  </div>
+
+  {%- comment -%} ── Results Bar ────────────────────────────────────── {%- endcomment -%}
+  <div class="jl-resultsbar">
+    <span>
+      {% if total_records == 0 %}
+        No listings found
+      {% elsif total_records == 1 %}
+        1 listing found
+      {% else %}
+        Showing {{ offset | plus: 1 }}–{{ offset | plus: page_size | at_most: total_records }}
+        of <strong>{{ total_records | format_number }}</strong> listings
+      {% endif %}
+    </span>
+  </div>
+
+  {%- comment -%} ── Card Grid ──────────────────────────────────────── {%- endcomment -%}
+  <div class="jl-grid">
+
+    {% if listings_query.results.entities.size == 0 %}
+      <div class="jl-empty">
+        <p>No job listings match your search.</p>
+        <a href="{{ page.url }}" class="jl-pag-btn">Clear filters</a>
+      </div>
+
+    {% else %}
+      {% for job in listings_query.results.entities %}
+
+        {% comment %} Derive 2-letter initials from organisation name {% endcomment %}
+        {% assign org_words = job.cr_organization | split: " " %}
+        {% assign init1 = org_words[0] | slice: 0 %}
+        {% assign init2 = org_words[1] | slice: 0 | default: org_words[0] | slice: 1 %}
+        {% assign initials = init1 | append: init2 | upcase %}
+
+        {% comment %} Badge CSS class based on location type {% endcomment %}
+        {% assign loc_lower = job.cr_location_type | downcase %}
+        {% if loc_lower == 'remote' %}
+          {% assign badge_class = 'badge-remote' %}
+        {% elsif loc_lower == 'hybrid' %}
+          {% assign badge_class = 'badge-hybrid' %}
+        {% else %}
+          {% assign badge_class = 'badge-onsite' %}
+        {% endif %}
+
+        {% comment %} Relative posted date label {% endcomment %}
+        {% assign days_ago = job.cr_posted_date | date_diff: 'now', 'days' | abs %}
+        {% if days_ago == 0 %}
+          {% assign posted_label = 'Posted today' %}
+        {% elsif days_ago == 1 %}
+          {% assign posted_label = 'Posted yesterday' %}
+        {% elsif days_ago < 7 %}
+          {% assign posted_label = 'Posted ' | append: days_ago | append: ' days ago' %}
+        {% elsif days_ago < 14 %}
+          {% assign posted_label = 'Posted 1 week ago' %}
+        {% else %}
+          {% assign weeks = days_ago | divided_by: 7 %}
+          {% assign posted_label = 'Posted ' | append: weeks | append: ' weeks ago' %}
+        {% endif %}
+
+        <div class="jl-card">
+          <div class="jl-card-top">
+            <div class="jl-card-initials">{{ initials }}</div>
+            <span class="jl-badge {{ badge_class }}">{{ job.cr_location_type }}</span>
+          </div>
+
+          <h3>{{ job.cr_title | xml_escape }}</h3>
+          <p class="jl-card-org">{{ job.cr_organization | xml_escape }}</p>
+
+          <div class="jl-tags">
+            {% if job.cr_position_type != '' %}
+              <span class="jl-tag">{{ job.cr_position_type }}</span>
+            {% endif %}
+            {% if job.cr_program != '' %}
+              <span class="jl-tag">{{ job.cr_program }}</span>
+            {% endif %}
+            {% if job.cr_region != '' %}
+              <span class="jl-tag">{{ job.cr_region }}</span>
+            {% endif %}
+          </div>
+
+          <div class="jl-card-foot">
+            <span>{{ posted_label }}</span>
+            {% if job.cr_apply_url != '' %}
+              <a class="jl-btn-apply"
+                 href="{{ job.cr_apply_url }}"
+                 target="_blank" rel="noopener">Apply</a>
+            {% else %}
+              <a class="jl-btn-apply"
+                 href="/job-detail?id={{ job.cr_joblistingid }}">View</a>
+            {% endif %}
+          </div>
+        </div>
+
+      {% endfor %}
+    {% endif %}
+
+  </div>
+
+  {%- comment -%} ── Pagination ─────────────────────────────────────── {%- endcomment -%}
+  {% if total_pages > 1 %}
+    <div class="jl-pagination">
+
+      {% if current_page > 1 %}
+        <a class="jl-pag-btn"
+           href="{{ page.url }}?page={{ current_page | minus: 1 }}&kw={{ kw | url_encode }}&position={{ position | url_encode }}&program={{ program | url_encode }}&location={{ location | url_encode }}"
+           >&larr; Prev</a>
+      {% endif %}
+
+      {% for p in (1..total_pages) %}
+        {% if p == current_page %}
+          <span class="jl-pag-btn active">{{ p }}</span>
+        {% elsif p == 1 or p == total_pages or p >= current_page | minus: 2 and p <= current_page | plus: 2 %}
+          <a class="jl-pag-btn"
+             href="{{ page.url }}?page={{ p }}&kw={{ kw | url_encode }}&position={{ position | url_encode }}&program={{ program | url_encode }}&location={{ location | url_encode }}"
+             >{{ p }}</a>
+        {% elsif p == current_page | minus: 3 or p == current_page | plus: 3 %}
+          <span class="jl-pag-info">…</span>
+        {% endif %}
+      {% endfor %}
+
+      {% if current_page < total_pages %}
+        <a class="jl-pag-btn"
+           href="{{ page.url }}?page={{ current_page | plus: 1 }}&kw={{ kw | url_encode }}&position={{ position | url_encode }}&program={{ program | url_encode }}&location={{ location | url_encode }}"
+           >Next &rarr;</a>
+      {% endif %}
+
+    </div>
+  {% endif %}
+
+</body>
+</html>

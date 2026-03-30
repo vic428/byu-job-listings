@@ -36,6 +36,7 @@ function getFilters() {
     kw:       document.getElementById('kw')?.value.trim().toLowerCase() || '',
     position: document.getElementById('position')?.value || '',
     program:  document.getElementById('program')?.value  || '',
+    workMode: document.getElementById('work-mode')?.value || '',
     location: document.getElementById('location')?.value || '',
   };
 }
@@ -46,6 +47,7 @@ function applyFilters(jobs, filters) {
                       !job.organization.toLowerCase().includes(filters.kw)) return false;
     if (filters.position && job.position_type !== filters.position) return false;
     if (filters.program  && job.program       !== filters.program)  return false;
+    if (filters.workMode && job.location_type !== filters.workMode)  return false;
     if (filters.location && job.location_type !== filters.location) return false;
     return true;
   });
@@ -107,7 +109,8 @@ function cardHTML(job) {
         <span class="badge ${badgeClass}">${escapeHTML(job.location_type)}</span>
       </div>
       <h2 class="card-title">${escapeHTML(job.title)}</h2>
-      <p  class="card-org">${escapeHTML(job.organization)}</p>
+      <p class="card-id">Job ID: ${escapeHTML(job.id)}</p>
+      <p class="card-org">${escapeHTML(job.organization)}</p>
       <div class="card-tags">
         ${job.position_type ? `<span class="tag">${escapeHTML(job.position_type)}</span>` : ''}
         ${job.program       ? `<span class="tag">${escapeHTML(job.program)}</span>`       : ''}
@@ -178,7 +181,7 @@ function bindFilterForm() {
 }
 
 function clearFilters() {
-  ['kw', 'position', 'program', 'location'].forEach(id => {
+  ['kw', 'position', 'program', 'work-mode', 'location'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -189,11 +192,12 @@ function clearFilters() {
 
 /* ── URL Sync (mirrors Power Pages query-string behaviour) ── */
 function syncURLParams() {
-  const { kw, position, program, location } = getFilters();
+  const { kw, position, program, workMode, location } = getFilters();
   const params = new URLSearchParams();
   if (kw)       params.set('kw', kw);
   if (position) params.set('position', position);
   if (program)  params.set('program', program);
+  if (workMode) params.set('work-mode', workMode);
   if (location) params.set('location', location);
   if (currentPage > 1) params.set('page', currentPage);
   const qs = params.toString();
@@ -206,6 +210,7 @@ function restoreFiltersFromURL() {
   set('kw',       'kw');
   set('position', 'position');
   set('program',  'program');
+  set('work-mode','work-mode');
   set('location', 'location');
   currentPage = parseInt(params.get('page') || '1', 10);
 }

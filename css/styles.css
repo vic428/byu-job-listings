@@ -166,12 +166,28 @@ a { text-decoration: none; }
 
 .filters {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr auto;
-  gap: 12px;
+  grid-template-columns: 1.2fr 0.6fr 0.6fr 0.6fr 0.6fr 0.6fr;
+  gap: 13px;
   align-items: end;
+  min-width: 0;
 }
 
-.fgroup { display: flex; flex-direction: column; gap: 4px; }
+@media (max-width: 1180px) {
+  .filters {
+    grid-template-columns: 1.2fr 0.7fr 0.7fr 0.7fr 0.7fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .filters {
+    grid-template-columns: 1fr 1fr;
+  }
+  .filters .fgroup:nth-last-child(1) {
+    grid-column: 1 / -1;
+  }
+}
+
+.fgroup { display: flex; flex-direction: column; gap: 2px; }
 
 .flabel {
   font-size: 10px;

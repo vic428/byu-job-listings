@@ -6,21 +6,33 @@
   SETUP REQUIREMENTS:
   1. Create a Dataverse table called "cr_job_listing" (or adjust the
      entityname below to match your actual table logical name).
-  2. Recommended columns:
-       cr_title          (Single line of text)
-       cr_organization   (Single line of text)
-       cr_position_type  (Choice: Full-time, Part-time, Internship)
-       cr_program        (Choice: Business Mgmt, Health Informatics,
-                          Computer Science, Accounting)
-       cr_location_type  (Choice: Remote, Hybrid, On-site)
-       cr_region         (Choice: Americas, Africa, Asia, Europe)
-       cr_posted_date    (Date Only)
-       cr_apply_url      (URL)
-  3. Set table permissions (read, minimum) for Web Roles that
-     should see the listings (e.g. Anonymous Users).
-  4. Paste this template into:
+  2. Recommended columns for cr_job_listing:
+       cr_joblistingid    (Primary key)
+       cr_title           (Single line of text)
+       cr_organization    (Single line of text)
+       cr_position_type   (Choice: Full-time, Part-time, Internship, Contract)
+       cr_program         (Choice: Business Management, Health Informatics,
+                           Computer Science, Accounting)
+       cr_location_type   (Choice: Remote, Hybrid, On-site)
+       cr_region          (Choice: Americas, Africa, Asia, Europe)
+       cr_posted_date     (Date Only)
+       cr_description     (Multiple lines of text - job summary)
+       cr_salary          (Single line of text - e.g. "$65k–$80k")
+       cr_apply_url       (URL - optional)
+  3. Create a Dataverse table called "cr_job_bookmark" for bookmarks:
+       cr_job_bookmarkid  (Primary key)
+       cr_job_listing     (Lookup to cr_job_listing)
+       cr_user_id         (Text - stores user email or ID)
+       cr_created_on      (Date Only - tracks when bookmarked)
+  4. Set table permissions (read for browsing, create/delete for bookmarking)
+     for Web Roles that should use the listings (e.g. Authenticated Users for bookmarks).
+  5. Set the current user email in the user_email variable below via
+     Power Fx or session variable.
+  6. Paste this template into:
        Power Pages Studio → Web Templates → New Web Template
      Then assign it to the "Job Listings" page via its Page Template.
+  7. Bookmark functionality persists in Dataverse and is available across
+     devices/browsers for authenticated users.
   ===================================================================
 {% endcomment %}
 
@@ -60,6 +72,8 @@
     <attribute name="cr_location_type" />
     <attribute name="cr_region" />
     <attribute name="cr_posted_date" />
+    <attribute name="cr_description" />
+    <attribute name="cr_salary" />
     <attribute name="cr_apply_url" />
     <filter type="and">
       <condition attribute="statecode" operator="eq" value="0" />
@@ -72,6 +86,27 @@
 
 {% assign total_records = listings_query.results.total_record_count | default: 0 %}
 {% assign total_pages = total_records | divided_by: page_size | ceil %}
+
+{% comment %} Get current user email {% endcomment %}
+{% assign user_email = user.email | default: '' %}
+
+{% comment %} Fetch user's saved job bookmarks from Dataverse {% endcomment %}
+{% if user_email != '' %}
+  {% fetchxml user_bookmarks_query %}
+  <fetch version="1.0" mapping="logical">
+    <entity name="cr_job_bookmark">
+      <attribute name="cr_job_bookmarkid" />
+      <attribute name="cr_job_listing" />
+      <filter type="and">
+        <condition attribute="cr_user_id" operator="eq" value="{{ user_email | xml_escape }}" />
+      </filter>
+    </entity>
+  </fetch>
+  {% endfetchxml %}
+  {% assign user_bookmarks = user_bookmarks_query.results.entities %}
+{% else %}
+  {% assign user_bookmarks = empty_array %}
+{% endif %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -116,55 +151,204 @@
     /* ---- GRID ---- */
     .jl-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px; padding: 20px 32px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px; padding: 20px 32px;
     }
 
     /* ---- CARD ---- */
     .jl-card {
       background: #fff; border: 1px solid #e0e0d8;
-      border-radius: 4px; padding: 18px;
+      border-radius: 8px; padding: 18px;
       display: flex; flex-direction: column; gap: 10px;
       transition: border-color .15s, box-shadow .15s;
+      position: relative;
     }
-    .jl-card:hover { border-color: #f0c030; box-shadow: 0 2px 12px rgba(26,39,68,.08); }
-    .jl-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
-    .jl-card-initials {
-      width: 40px; height: 40px; border-radius: 3px;
-      background: #eef2fa; display: flex; align-items: center;
-      justify-content: center; font-size: 13px; font-weight: 700;
+    .jl-card:hover { border-color: #d0d0c8; box-shadow: 0 4px 16px rgba(26,39,68,.08); }
+    
+    /* Underline effects on hover */
+    .jl-card:hover .jl-card h3 {
+      text-decoration: underline;
+      text-decoration-color: #f0c030;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+    }
+    
+    /* Card header with bookmark button space */
+    .jl-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding-right: 40px;
+    }
+    
+    /* Bookmark button */
+    .jl-btn-bookmark {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color .15s, background .15s, transform .15s;
+      line-height: 0;
+    }
+    
+    .jl-btn-bookmark svg {
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+    }
+    
+    .jl-btn-bookmark:hover {
       color: #1a2744;
     }
-    .jl-badge {
-      font-size: 10px; padding: 3px 8px;
-      border-radius: 100px; font-weight: 500;
+    
+    .jl-btn-bookmark.saved {
+      color: #1a2744;
     }
-    .badge-remote  { background: #e8f5f0; color: #0f6e56; }
-    .badge-hybrid  { background: #eeedfe; color: #3c3489; }
-    .badge-onsite  { background: #faeeda; color: #633806; }
-    .jl-card h3 { font-size: 14px; font-weight: 700; color: #1a2744; line-height: 1.35; }
-    .jl-card-org { font-size: 12px; color: #777; }
-    .jl-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-    .jl-tag {
-      font-size: 10px; padding: 2px 7px; border-radius: 2px;
-      background: #f0f2f8; color: #1a2744;
-      border: 1px solid #dde2f0;
+    
+    .jl-btn-bookmark.saved svg {
+      fill: #1a2744;
     }
-    .jl-card-foot {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      border-top: 1px solid #f0f0e8; padding-top: 10px;
+    
+    .jl-btn-bookmark.pulse {
+      animation: bookmark-pulse 0.3s ease-out;
     }
-    .jl-card-foot span { font-size: 11px; color: #aaa; }
-    .jl-btn-apply {
-      font-size: 11px; color: #1a2744; font-family: Georgia, serif;
-      border: 1px solid #1a2744; padding: 4px 12px;
-      border-radius: 2px; background: transparent;
-      font-weight: 500; cursor: pointer; text-decoration: none;
+    
+    @keyframes bookmark-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
     }
-    .jl-btn-apply:hover { background: #1a2744; color: #fff; }
+    
+    .jl-card-initials {
+      width: 38px; height: 38px; border-radius: 8px;
+      background: #eef2fa; display: flex; align-items: center;
+      justify-content: center; font-size: 14px; font-weight: 700;
+      color: #1a2744;
+      flex-shrink: 0;
+    }
+    
+    .jl-card-company-block {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .jl-card-company {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a2744;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .jl-card-location {
+      font-size: 12px;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-top: 2px;
+    }
+    
+    .jl-card-location svg {
+      width: 11px;
+      height: 11px;
+      flex-shrink: 0;
+    }
+    
+    .jl-card-date {
+      font-size: 11px;
+      color: #9ca3af;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    .jl-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a2744;
+      line-height: 1.3;
+      margin-top: 0;
+    }
+    
+    .jl-card-desc {
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
-    /* ---- EMPTY STATE ---- */
+    .jl-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .jl-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .jl-tag {
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 100px;
+      font-weight: 500;
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .jl-card-salary {
+      font-size: 13px;
+      font-weight: 700;
+      color: #16a34a;
+      white-space: nowrap;
+    }
+
+    /* Card action buttons */
+    .jl-card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .jl-card-action-btn {
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      border: 1px solid #e4e4e8;
+      background: #ffffff;
+      color: #1a1a2e;
+      cursor: pointer;
+      font-family: -apple-system, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      transition: background .15s, color .15s, border-color .15s;
+      text-decoration: none;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .jl-card-action-btn:hover {
+      border-color: #f0c030;
+      background: #f0c030;
+      color: #1a2744;
+    }
     .jl-empty {
       grid-column: 1 / -1; text-align: center;
       padding: 60px 20px; color: #999;
@@ -288,62 +472,68 @@
         {% assign init2 = org_words[1] | slice: 0 | default: org_words[0] | slice: 1 %}
         {% assign initials = init1 | append: init2 | upcase %}
 
-        {% comment %} Badge CSS class based on location type {% endcomment %}
-        {% assign loc_lower = job.cr_location_type | downcase %}
-        {% if loc_lower == 'remote' %}
-          {% assign badge_class = 'badge-remote' %}
-        {% elsif loc_lower == 'hybrid' %}
-          {% assign badge_class = 'badge-hybrid' %}
-        {% else %}
-          {% assign badge_class = 'badge-onsite' %}
-        {% endif %}
-
         {% comment %} Relative posted date label {% endcomment %}
         {% assign days_ago = job.cr_posted_date | date_diff: 'now', 'days' | abs %}
         {% if days_ago == 0 %}
-          {% assign posted_label = 'Posted today' %}
+          {% assign posted_label = 'Today' %}
         {% elsif days_ago == 1 %}
-          {% assign posted_label = 'Posted yesterday' %}
+          {% assign posted_label = '1d ago' %}
         {% elsif days_ago < 7 %}
-          {% assign posted_label = 'Posted ' | append: days_ago | append: ' days ago' %}
+          {% assign posted_label = days_ago | append: 'd ago' %}
         {% elsif days_ago < 14 %}
-          {% assign posted_label = 'Posted 1 week ago' %}
+          {% assign posted_label = '1w ago' %}
         {% else %}
           {% assign weeks = days_ago | divided_by: 7 %}
-          {% assign posted_label = 'Posted ' | append: weeks | append: ' weeks ago' %}
+          {% assign posted_label = weeks | append: 'w ago' %}
         {% endif %}
 
+        {% comment %} Check if this job is already bookmarked {% endcomment %}
+        {% assign is_bookmarked = false %}
+        {% for bookmark in user_bookmarks %}
+          {% if bookmark.cr_job_listing == job.cr_joblistingid %}
+            {% assign is_bookmarked = true %}
+          {% endif %}
+        {% endfor %}
+
         <div class="jl-card">
-          <div class="jl-card-top">
+          <button class="jl-btn-bookmark{% if is_bookmarked %} saved{% endif %}" data-id="{{ job.cr_joblistingid }}" aria-label="{% if is_bookmarked %}Remove bookmark{% else %}Bookmark this job{% endif %}" title="{% if is_bookmarked %}Remove bookmark{% else %}Save job{% endif %}">
+            <svg viewBox="0 0 24 24" fill="{% if is_bookmarked %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+          
+          <div class="jl-card-header">
             <div class="jl-card-initials">{{ initials }}</div>
-            <span class="jl-badge {{ badge_class }}">{{ job.cr_location_type }}</span>
+            <div class="jl-card-company-block">
+              <div class="jl-card-company">{{ job.cr_organization | xml_escape }}</div>
+              <div class="jl-card-location">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 21s-8-7.5-8-12a8 8 0 0 1 16 0c0 4.5-8 12-8 12z"/>
+                  <circle cx="12" cy="9" r="2.5"/>
+                </svg>
+                {{ job.cr_joblistingid | xml_escape }} • {{ job.cr_location_type }}
+              </div>
+            </div>
+            <span class="jl-card-date">{{ posted_label }}</span>
           </div>
 
           <h3>{{ job.cr_title | xml_escape }}</h3>
-          <p class="jl-card-org">{{ job.cr_organization | xml_escape }}</p>
 
-          <div class="jl-tags">
-            {% if job.cr_position_type != '' %}
+          <p class="jl-card-desc">{{ job.cr_description | xml_escape }}</p>
+
+          <div class="jl-card-footer">
+            <div class="jl-tags">
               <span class="jl-tag">{{ job.cr_position_type }}</span>
-            {% endif %}
-            {% if job.cr_program != '' %}
-              <span class="jl-tag">{{ job.cr_program }}</span>
-            {% endif %}
-            {% if job.cr_region != '' %}
-              <span class="jl-tag">{{ job.cr_region }}</span>
+              <span class="jl-tag">{{ job.cr_program | split: " " | first }}</span>
+            </div>
+            {% if job.cr_salary != '' %}
+              <span class="jl-card-salary">{{ job.cr_salary | xml_escape }}</span>
             {% endif %}
           </div>
 
-          <div class="jl-card-foot">
-            <span>{{ posted_label }}</span>
-            {% if job.cr_apply_url != '' %}
-              <a class="jl-btn-apply"
-                 href="{{ job.cr_apply_url }}"
-                 target="_blank" rel="noopener">Apply</a>
-            {% else %}
-              <a class="jl-btn-apply"
-                 href="/job-detail?id={{ job.cr_joblistingid }}">View</a>
-            {% endif %}
+          <div class="jl-card-actions">
+            <a href="/job-details?id={{ job.cr_joblistingid }}" class="jl-card-action-btn">View Details</a>
+            <a href="/job-application?id={{ job.cr_joblistingid }}" class="jl-card-action-btn">Apply Now</a>
           </div>
         </div>
 
@@ -382,6 +572,154 @@
 
     </div>
   {% endif %}
+
+  <script>
+    const userEmail = '{{ user_email | xml_escape }}';
+    const bookmarkTableName = 'cr_job_bookmark';
+    const jobListingTableName = 'cr_job_listing';
+
+    function getWebApiUrl(entityName) {
+      return `/_api/data/v9.2/${entityName}`;
+    }
+
+    /* Create a bookmark record in Dataverse */
+    async function createBookmarkInDataverse(jobListingId) {
+      if (!userEmail) {
+        console.warn('User not authenticated. Cannot save bookmark.');
+        return false;
+      }
+
+      try {
+        const data = {
+          'cr_job_listing@odata.bind': `/${jobListingTableName}(${jobListingId})`,
+          cr_user_id: userEmail
+        };
+
+        const response = await fetch(getWebApiUrl(bookmarkTableName), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'OData-MaxVersion': '4.0',
+            'OData-Version': '4.0'
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          return true;
+        } else {
+          console.error('Failed to create bookmark:', response.status);
+          return false;
+        }
+      } catch (error) {
+        console.error('Error creating bookmark:', error);
+        return false;
+      }
+    }
+
+    /* Delete a bookmark record from Dataverse */
+    async function deleteBookmarkFromDataverse(jobListingId) {
+      if (!userEmail) {
+        console.warn('User not authenticated. Cannot delete bookmark.');
+        return false;
+      }
+
+      try {
+        const query = `?$filter=cr_job_listing eq ${jobListingId} and cr_user_id eq '${userEmail}'`;
+        const response = await fetch(getWebApiUrl(bookmarkTableName) + query, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'OData-MaxVersion': '4.0',
+            'OData-Version': '4.0'
+          }
+        });
+
+        if (!response.ok) {
+          console.error('Failed to query bookmarks:', response.status);
+          return false;
+        }
+
+        const data = await response.json();
+        if (!data.value || data.value.length === 0) {
+          console.warn('Bookmark not found');
+          return false;
+        }
+
+        const bookmarkId = data.value[0].cr_job_bookmarkid;
+        const deleteResponse = await fetch(
+          getWebApiUrl(bookmarkTableName) + `(${bookmarkId})`,
+          {
+            method: 'DELETE',
+            headers: {
+              'OData-MaxVersion': '4.0',
+              'OData-Version': '4.0'
+            }
+          }
+        );
+
+        return deleteResponse.ok || deleteResponse.status === 204;
+      } catch (error) {
+        console.error('Error deleting bookmark:', error);
+        return false;
+      }
+    }
+
+    /* Toggle bookmark state */
+    async function toggleBookmark(jobId, isCurrentlySaved) {
+      if (!userEmail) {
+        alert('Please sign in to save jobs.');
+        return isCurrentlySaved;
+      }
+
+      let success = false;
+      if (isCurrentlySaved) {
+        success = await deleteBookmarkFromDataverse(jobId);
+      } else {
+        success = await createBookmarkInDataverse(jobId);
+      }
+
+      return success ? !isCurrentlySaved : isCurrentlySaved;
+    }
+
+    function updateBookmarkButton(jobId, isSaved) {
+      const btn = document.querySelector(`.jl-btn-bookmark[data-id="${jobId}"]`);
+      if (!btn) return;
+
+      btn.classList.toggle('saved', isSaved);
+      btn.setAttribute('aria-label', isSaved ? 'Remove bookmark' : 'Bookmark this job');
+      btn.setAttribute('title', isSaved ? 'Remove bookmark' : 'Save job');
+      const svg = btn.querySelector('svg');
+      if (isSaved) {
+        svg.setAttribute('fill', 'currentColor');
+      } else {
+        svg.setAttribute('fill', 'none');
+      }
+    }
+
+    function bindBookmarkButtons() {
+      document.querySelectorAll('.jl-btn-bookmark').forEach(btn => {
+        const jobId = btn.dataset.id;
+        const isCurrentlySaved = btn.classList.contains('saved');
+
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          btn.disabled = true;
+
+          const newSavedState = await toggleBookmark(jobId, isCurrentlySaved);
+          updateBookmarkButton(jobId, newSavedState);
+
+          btn.classList.add('pulse');
+          setTimeout(() => {
+            btn.classList.remove('pulse');
+            btn.disabled = false;
+          }, 300);
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', bindBookmarkButtons);
+  </script>
 
 </body>
 </html>

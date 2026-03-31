@@ -94,9 +94,10 @@ function renderGrid(jobs, total) {
 function cardHTML(job) {
   const initials   = getInitials(job.organization);
   const dateLabel  = relativeDate(job.posted_days_ago);
-  const locationDisplay = job.location_type === 'Remote' || job.location_type === 'Hybrid'
+  const baseLocation = job.location_type === 'Remote' || job.location_type === 'Hybrid'
     ? job.location_type
     : job.region || job.location_type;
+  const locationDisplay = `${job.id} • ${baseLocation}`;
 
   /* Tag colours */
   const typeTagClass = {
@@ -133,6 +134,11 @@ function cardHTML(job) {
           <span class="tag tag-location">${escapeHTML(job.program.split(' ')[0])}</span>
         </div>
         ${job.salary ? `<span class="card-salary">${escapeHTML(job.salary)}</span>` : ''}
+      </div>
+
+      <div class="card-actions">
+        <a href="job-details.html?id=${encodeURIComponent(job.id)}" class="card-action-btn">View Details</a>
+        <a href="job-application.html?id=${encodeURIComponent(job.id)}" class="card-action-btn">Apply Now</a>
       </div>
     </article>`;
 }

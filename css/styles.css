@@ -383,6 +383,35 @@ a { text-decoration: none; }
   white-space: nowrap;
 }
 
+/* Card action buttons */
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.card-action-btn {
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--text);
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 500;
+  transition: background .15s, color .15s, border-color .15s;
+  text-decoration: none;
+  display: inline-block;
+  white-space: nowrap;
+}
+.card-action-btn:hover {
+  border-color: var(--blue-pill);
+  background: #f0f4ff;
+  color: var(--blue-pill);
+}
+
 /* Empty state */
 .empty-state {
   grid-column: 1 / -1;

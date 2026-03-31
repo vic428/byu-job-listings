@@ -253,6 +253,69 @@ a { text-decoration: none; }
 .btn-clear:hover { background: var(--bg); color: var(--text); }
 
 /* ================================================================
+   BOOKMARK BUTTON — copy into your styles.css
+   ================================================================ */
+
+/* Wraps the date + bookmark icon in the card header top-right */
+.card-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.btn-bookmark {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #9ca3af;                /* unfilled state — grey */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .15s, background .15s, transform .15s;
+  line-height: 0;
+}
+
+.btn-bookmark svg {
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
+
+.btn-bookmark:hover {
+  color: #1a2744;
+  background: #f4f5f7;
+}
+
+/* Saved / active state — filled bookmark in navy */
+.btn-bookmark.saved {
+  color: #1a2744;
+}
+
+.btn-bookmark.saved svg {
+  fill: #1a2744;
+}
+
+/* Scale pulse on toggle click */
+.btn-bookmark.pulse {
+  animation: bookmark-pulse 0.3s ease-out;
+}
+
+@keyframes bookmark-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+
+/* ================================================================
    RESULTS PANEL
 ================================================================ */
 .results-panel { min-width: 0; }
@@ -277,6 +340,7 @@ a { text-decoration: none; }
   gap: 10px;
   cursor: pointer;
   transition: box-shadow .15s, border-color .15s;
+  position: relative;
 }
 .job-card:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,.08);
@@ -288,6 +352,7 @@ a { text-decoration: none; }
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  padding-right: 20px;
 }
 
 .card-initials {

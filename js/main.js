@@ -88,10 +88,12 @@ function renderGrid(jobs, total) {
   }
 
   grid.innerHTML = jobs.map(cardHTML).join('');
+  bindBookmarkButtons();
 }
 
 /* ── Card HTML ──────────────────────────────────────────────────── */
 function cardHTML(job) {
+  const isSaved = getSavedIds().has(job.id);   // check if this job is bookmarked 
   const initials   = getInitials(job.organization);
   const dateLabel  = relativeDate(job.posted_days_ago);
   const baseLocation = job.location_type === 'Remote' || job.location_type === 'Hybrid'
@@ -109,6 +111,11 @@ function cardHTML(job) {
 
   return `
     <article class="job-card">
+      <button class="btn-bookmark${isSaved ? ' saved' : ''}" data-id="${job.id}" aria-label="${isSaved ? 'Remove bookmark' : 'Bookmark this job'}" title="${isSaved ? 'Remove bookmark' : 'Save job'}">
+        <svg viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+        </svg>
+      </button>
       <div class="card-header">
         <div class="card-initials">${initials}</div>
         <div class="card-company-block">
@@ -313,4 +320,88 @@ function relativeDate(daysAgo) {
 function escapeHTML(str) {
   return String(str || '').replace(/[&<>"']/g, c =>
     ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+/* ================================================================
+   BOOKMARK FUNCTIONS — copy into your main.js
+   ================================================================
+
+   STEP 1: Paste all functions below into main.js
+
+   STEP 2: In your renderGrid() function, add bindBookmarkButtons()
+           on the line immediately after grid.innerHTML = ...
+
+           BEFORE:
+             grid.innerHTML = jobs.map(cardHTML).join('');
+
+           AFTER:
+             grid.innerHTML = jobs.map(cardHTML).join('');
+             bindBookmarkButtons();   // <-- add this line
+
+   STEP 3: In your cardHTML() function, add this line near the top:
+             const isSaved = getSavedIds().has(job.id);
+
+   That's it — no other changes needed.
+================================================================ */
+
+const BOOKMARK_KEY = 'byu_saved_jobs';   // localStorage key
+
+/* ── Read saved IDs from localStorage ── */
+function getSavedIds() {
+  try {
+    const raw = localStorage.getItem(BOOKMARK_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+/* ── Write saved IDs back to localStorage ── */
+function persistSavedIds(set) {
+  try {
+    localStorage.setItem(BOOKMARK_KEY, JSON.stringify([...set]));
+  } catch {
+    console.warn('localStorage not available.');
+  }
+}
+
+/* ── Toggle a job in/out of saved list ── */
+function toggleBookmark(jobId) {
+  const saved = getSavedIds();
+  if (saved.has(jobId)) {
+    saved.delete(jobId);
+  } else {
+    saved.add(jobId);
+  }
+  persistSavedIds(saved);
+  return saved.has(jobId);   // returns true if now saved, false if removed
+}
+
+/* ── Update a single button's visual state in the DOM ── */
+function updateBookmarkButton(jobId, isSaved) {
+  const btn = document.querySelector(`.btn-bookmark[data-id="${jobId}"]`);
+  if (!btn) return;
+
+  btn.classList.toggle('saved', isSaved);
+  btn.setAttribute('aria-label', isSaved ? 'Remove bookmark' : 'Bookmark this job');
+  btn.setAttribute('title',      isSaved ? 'Remove bookmark' : 'Save job');
+  btn.querySelector('svg').setAttribute('fill', isSaved ? 'currentColor' : 'none');
+}
+
+/* ── Attach click handlers to every bookmark button in the grid ──
+   Call this once after grid.innerHTML is set (inside renderGrid)   */
+function bindBookmarkButtons() {
+  document.querySelectorAll('.btn-bookmark').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();                     // prevent card click bubbling
+
+      const jobId   = btn.dataset.id;
+      const isSaved = toggleBookmark(jobId);
+      updateBookmarkButton(jobId, isSaved);
+
+      /* Brief scale pulse for tactile feedback */
+      btn.classList.add('pulse');
+      setTimeout(() => btn.classList.remove('pulse'), 300);
+    });
+  });
 }

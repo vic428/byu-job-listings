@@ -8,6 +8,47 @@
 </head>
 <body>
 
+  <script>
+    // Check if user is logged in and update header accordingly
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    function getInitials(fullName) {
+      const names = fullName.split(' ');
+      return names.map(n => n.charAt(0)).join('').toUpperCase();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginBtn = document.getElementById('loginBtn');
+      const registerBtn = document.getElementById('registerBtn');
+      const userPillContainer = document.getElementById('userPillContainer');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      if (token && user) {
+        // User is logged in - hide login/register buttons, show user pill
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (registerBtn) registerBtn.style.display = 'none';
+        if (userPillContainer) userPillContainer.style.display = 'flex';
+        
+        // Update user info
+        const initials = getInitials(user.fullName);
+        document.getElementById('userInitials').textContent = initials;
+        document.getElementById('userDisplayName').textContent = user.fullName.split(' ')[0];
+      } else {
+        // User is not logged in - show login/register buttons
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (registerBtn) registerBtn.style.display = 'inline-block';
+        if (userPillContainer) userPillContainer.style.display = 'none';
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    }
+  </script>
+
   <!-- ============================================================
        HEADER — mirrors Power Pages Header web template
   ============================================================ -->
@@ -23,13 +64,20 @@
       </div>
 
       <nav class="top-nav" aria-label="Primary">
-        <a href="#" class="nav-link">Home</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
         <a href="index.html" class="nav-link active">Browse Jobs</a>
-        <a href="#" class="nav-link">About</a>
+        <a href="aboutus.html" class="nav-link">About</a>
       </nav>
 
-      <div class="header-ctas">
-        <a href="#" class="btn-find-job">Find a Job</a>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="user-pill" id="userPillContainer" style="display:none;">
+          <div class="user-avatar" id="userInitials">AJ</div>
+          <span style="font-size:13px;color:var(--text);font-weight:500;" id="userDisplayName">Alanah J.</span>
+        </div>
+        <a href="login.html" class="btn-login" id="loginBtn" style="display:none;">Login</a>
+        <a href="register.html" class="btn-register" id="registerBtn" style="display:none;">Register</a>
+        <a href="index.html" class="btn-find-job">Find a Job</a>
+        <button onclick="logout()" id="logoutBtn" style="background:none;border:none;color:#666;cursor:pointer;font-size:14px;padding:8px 12px;display:none;">Logout</button>
       </div>
     </div>
   </header>
@@ -38,79 +86,80 @@
   <!-- ============================================================
        MAIN
   ============================================================ -->
-  <main class="page-main">
+  <main class="page-body-wrap">
 
-    <div class="page-title">
-      <h1>Browse Jobs</h1>
-      <p id="resultsCount" class="results-count">Loading…</p>
-    </div>
-
-    <div class="page-body">
-
-      <!-- LEFT SIDEBAR -->
-      <aside class="filter-sidebar">
+    <!-- ── LEFT SIDEBAR FILTERS ── -->
+    <aside class="filter-sidebar">
+      <div class="sidebar-heading-wrap">
         <h2 class="sidebar-heading">Filters</h2>
+      </div>
 
-        <div class="filter-group">
-          <label class="filter-label" for="kw">Keyword</label>
-          <div class="search-input-wrap">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input class="filter-input" id="kw" type="text" placeholder="Title, company…" />
-          </div>
+      <div class="filter-group">
+        <label class="filter-label" for="kw">Keyword</label>
+        <div class="search-input-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input class="filter-input" id="kw" type="text" placeholder="Title, company…" />
         </div>
+      </div>
 
-        <div class="filter-group">
-          <label class="filter-label">Program</label>
-          <div class="pill-group" id="programPills">
-            <button class="pill active" data-value="">All</button>
-            <button class="pill" data-value="Business Management">Business</button>
-            <button class="pill" data-value="Health Informatics">Health</button>
-            <button class="pill" data-value="Computer Science">Technology</button>
-            <button class="pill" data-value="Accounting">Accounting</button>
-            <button class="pill" data-value="Marketing">Marketing</button>
-          </div>
+      <div class="filter-group">
+        <label class="filter-label">Program</label>
+        <div class="pill-group" id="programPills">
+          <button class="pill active" data-value="">All</button>
+          <button class="pill" data-value="Business Management">Business</button>
+          <button class="pill" data-value="Health Informatics">Health</button>
+          <button class="pill" data-value="Computer Science">Technology</button>
+          <button class="pill" data-value="Accounting">Accounting</button>
+          <button class="pill" data-value="Marketing">Marketing</button>
         </div>
+      </div>
 
-        <div class="filter-group">
-          <label class="filter-label">Job Type</label>
-          <div class="pill-group" id="positionPills">
-            <button class="pill active" data-value="">All</button>
-            <button class="pill" data-value="Full-time">Full-time</button>
-            <button class="pill" data-value="Part-time">Part-time</button>
-            <button class="pill" data-value="Contract">Contract</button>
-            <button class="pill" data-value="Internship">Internship</button>
-          </div>
+      <div class="filter-group">
+        <label class="filter-label">Job Type</label>
+        <div class="pill-group" id="positionPills">
+          <button class="pill active" data-value="">All</button>
+          <button class="pill" data-value="Full-time">Full-time</button>
+          <button class="pill" data-value="Part-time">Part-time</button>
+          <button class="pill" data-value="Contract">Contract</button>
+          <button class="pill" data-value="Internship">Internship</button>
         </div>
+      </div>
 
-        <div class="filter-group">
-          <label class="filter-label" for="location">Location</label>
-          <div class="select-wrap">
-            <select class="filter-select" id="location">
-              <option value="">All</option>
-              <option value="Remote">Remote</option>
-              <option value="Hybrid">Hybrid</option>
-              <option value="On-site">On-site</option>
-              <option value="Americas">Americas</option>
-              <option value="Africa">Africa</option>
-            </select>
-            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </div>
+      <div class="filter-group">
+        <label class="filter-label" for="location">Location</label>
+        <div class="select-wrap">
+          <select class="filter-select" id="location">
+            <option value="">All</option>
+            <option value="Remote">Remote</option>
+            <option value="Hybrid">Hybrid</option>
+            <option value="On-site">On-site</option>
+            <option value="Americas">Americas</option>
+            <option value="Africa">Africa</option>
+          </select>
+          <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
         </div>
+      </div>
 
-        <button class="btn-clear" id="clearBtn">Clear all filters</button>
-      </aside>
+      <button class="btn-clear" id="clearBtn">Clear all filters</button>
+    </aside>
 
-      <!-- RIGHT RESULTS -->
+    <!-- ── MAIN RESULTS CONTENT ── -->
+    <div class="page-main">
+      <div class="page-title">
+        <h1>Browse Jobs</h1>
+        <p id="resultsCount" class="results-count">Loading…</p>
+      </div>
+
       <section class="results-panel">
         <div class="job-grid" id="jobGrid"></div>
         <nav class="pagination" id="pagination"></nav>
       </section>
-
     </div>
+
   </main>
 
 
